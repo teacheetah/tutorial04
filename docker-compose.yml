@@ -1,0 +1,73 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:local
+    hostname: database
+    build:
+      context: .
+      dockerfile: postgres.Dockerfile
+    restart: always
+    env_file: ./config/database.env
+    volumes:
+      - ./data/db-7:/var/lib/postgresql/data
+  auth:
+    image: auth:latest
+    hostname: auth
+    restart: always
+    build:
+      context: .
+      dockerfile: auth.Dockerfile
+    # ports:
+    #   - 8000:8000
+    env_file: ./config/database.env
+    environment:
+      - SERVICE_LOGS_DIR=/teacheetah/logs
+      - DB_HOST=database
+    command:
+      - gunicorn
+      - --bind
+      - 0.0.0.0:8000
+      - main:init_app
+      - --reload       # TODO: uncomment this for production
+      - --worker-class
+      - aiohttp.GunicornWebWorker
+      - --access-logfile 
+      - '-'
+    volumes:
+      # - backend_logs:/teacheetah/logs
+      - ./:/teacheetah/
+      - ./logs/backend:/teacheetah/logs
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+  webserver:
+    image: webserver
+    build:
+      context: .
+      dockerfile: nginx.Dockerfile
+    ports:
+      - 82:80
+      # - 443:443
+    volumes:
+      # - nginx_logs:/etc/nginx/logs
+      - ./logs/webserver:/var/log/nginx
+      - ./config/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      auth:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 2m
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  nginx_logs:
+  backend_logs:

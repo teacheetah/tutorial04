@@ -1,0 +1,6 @@
+aiohttp
+gunicorn
+jinja2
+aiohttp_jinja2
+sqlalchemy
+aiopg==1.0.0

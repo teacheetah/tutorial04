@@ -15,6 +15,11 @@ auth_table = sa.Table(
     sa.Column('password', sa.String(128), nullable=True),
     sa.Column('insert_time', sa.DateTime, default=datetime.utcnow),
     sa.Column('update_time', sa.DateTime, default=datetime.utcnow),
+
+    sa.Column('title', sa.String(16), nullable=True),
+    sa.Column('status', sa.String(32), nullable=True),
+
+    sa.Column('address', sa.String(64), nullable=True),
 )
 
 
@@ -35,9 +40,17 @@ class DBHelper():
         return self.get_table().columns.keys()
 
     def serialize(self, row):
+        if not row:
+            raise Exception('Not found')
+        
+        # ser = {key: getattr(row, key, None) for key in self.columns()}
         ser = {key: row[key] for key in self.columns()}
-        ser['insert_time'] = ser['insert_time'].isoformat()
-        ser['update_time'] = ser['update_time'].isoformat()
+        
+        ser.pop('password', None)
+        if ser['insert_time']:
+            ser['insert_time'] = ser['insert_time'].isoformat()
+        if ser['update_time']:
+            ser['update_time'] = ser['update_time'].isoformat()
         return ser
 
     def serialize_insert(self, row):

@@ -9,9 +9,10 @@ from aiohttp import web
 from pathlib import Path
 from typing import List
 
-from settings import LOGGING, DATABASE
+from settings import LOGGING, DATABASE, REDIS
 from apps.routes import setup_routes
 from apps.db import setup_db
+from apps.tasks import setup_redis
 
 async def init_app() -> web.Application:
     # set logging config
@@ -23,12 +24,16 @@ async def init_app() -> web.Application:
     # add app configs
     app['config'] = {}
     app['config']['database'] = DATABASE
+    app['config']['redis'] = REDIS
 
     # add routes
     setup_routes(app)
 
     # setup db connections
     await setup_db(app)
+
+    # setup redis connections
+    await setup_redis(app)
 
     # html templates
     path = Path(__file__).parent

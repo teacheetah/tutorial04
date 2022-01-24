@@ -2,7 +2,7 @@ import logging
 import aiopg.sa
 from sqlalchemy import create_engine
 
-from .auth.models import metadata
+from apps.auth.models import metadata
 
 logger = logging.getLogger(__name__)
 

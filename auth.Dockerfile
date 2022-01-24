@@ -11,7 +11,8 @@ WORKDIR /teacheetah
 
 RUN pip install -r config/requirements.txt
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "main:init_app", "--worker-class", "aiohttp.GunicornWebWorker", "--access-logfile", "-"]
+# CMD ["gunicorn", "--bind", "0.0.0.0:8000", "main:init_app", "--worker-class", "aiohttp.GunicornWebWorker", "--access-logfile", "-"]
+ENTRYPOINT ["/teacheetah/docker-entrypoint.sh"]
 
 HEALTHCHECK --interval=5m --timeout=3s \
   CMD curl -f http://localhost:8000/api/v1/health || exit 1

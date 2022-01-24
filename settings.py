@@ -72,3 +72,9 @@ DATABASES = {
     }
 }
 DATABASE = DATABASES[os.getenv('DB_CONFIG', 'default')]
+
+REDIS = {
+    'HOST': os.getenv('REDIS_HOST', 'localhost'),
+    'PORT': os.getenv('REDIS_PORT', 6379),
+    'DB': 0
+}
